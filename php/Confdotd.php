@@ -103,7 +103,7 @@ class Confdotd {
 		$origPath = $this->dir.'/'.$entry->name;
 		$linkPath = $this->dirEnabled.'/'.$entry->name;
 		
-		return ( file_exists( $linkPath ) && is_link( $linkPath ) && ( realpath( $linkPath ) == $origPath ) );
+		return ( file_exists( $origPath ) && is_link( $linkPath ) && ( realpath( $linkPath ) == $origPath ) );
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Confdotd {
 		
 		$linkPath = $this->dirEnabled.'/'.$entry->name;
 		
-		if ( !file_exists( $linkPath ) && symlink( $configPath, $linkPath ) ) {
+		if ( !is_link( $linkPath ) && symlink( $configPath, $linkPath ) ) {
 			$entry->enabled = true;
 			
 			return true;
@@ -136,7 +136,7 @@ class Confdotd {
 		$this->CheckDir( $entry );
 		
 		$filename = $this->dirEnabled.'/'.$entry->name;
-		if ( file_exists( $filename ) && unlink( $filename ) ) {
+		if ( is_link( $filename ) && unlink( $filename ) ) {
 			$entry->enabled = false;
 			
 			return true;

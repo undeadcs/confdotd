@@ -122,9 +122,7 @@ function TestConfigs( string $dir, string $dirEnabled, Condition $condition ) {
 	sort( $testEnabled );
 	
 	foreach( $testEnabled as $name ) {
-		$entry = new Entry( $name, $dir );
-		
-		if ( !$confd->Enable( $entry ) ) {
+		if ( !$confd->Enable( $name ) ) {
 			throw new RuntimeException( "failed to enable '$name' config" );
 		}
 	}
@@ -145,9 +143,7 @@ function TestConfigs( string $dir, string $dirEnabled, Condition $condition ) {
 	sort( $testEnabled );
 	
 	foreach( $testDisabled as $name ) {
-		$entry = new Entry( $name, $dir );
-		
-		if ( !$confd->Disable( $entry ) ) {
+		if ( !$confd->Disable( $name ) ) {
 			throw new RuntimeException( "failed to disable '$name' config" );
 		}
 	}
@@ -168,9 +164,7 @@ function TestConfigs( string $dir, string $dirEnabled, Condition $condition ) {
 	sort( $testEnabled );
 	
 	foreach( $testDeleted as $name ) {
-		$entry = new Entry( $name, $dir );
-		
-		if ( !$confd->Delete( $entry ) ) {
+		if ( !$confd->Delete( $name ) ) {
 			throw new RuntimeException( "failed to delete '$name' config" );
 		}
 	}

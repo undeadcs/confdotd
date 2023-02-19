@@ -42,12 +42,13 @@ class Confdotd {
 		$ret = [ ];
 		$entries = scandir( $this->dir );
 		foreach( $entries as $file ) {
-			$entry = new Entry( $file, $this->dir );
-			
-			if ( ( $file != '.' ) && ( $file != '..' ) && $this->condition->Match( $entry ) ) {
-				$entry->enabled = $this->IsEnabled( $entry );
+			if ( ( $file != '.' ) && ( $file != '..' ) ) {
+				$entry = new Entry( $file, $this->dir );
 				
-				$ret[ ] = $entry;
+				if ( $this->condition->Match( $entry ) ) {
+					$entry->enabled = $this->IsEnabled( $entry->name );
+					$ret[ ] = $entry;
+				}
 			}
 		}
 		
@@ -55,22 +56,12 @@ class Confdotd {
 	}
 	
 	/**
-	 * Проверка, что элемент принадлежит той же директории
-	 */
-	protected function CheckDir( Entry $entry ) {
-		if ( $entry->dir !== $this->dir ) { // элемент не принадлежит этой директории
-			throw new \RuntimeException( 'Invalid entry dir' );
-		}
-	}
-	
-	/**
 	 * Добавление конфига
 	 */
 	public function Add( string $name ) : ?Entry {
 		$filename = $this->dir.'/'.$name;
-		if ( !file_exists( $filename ) && ( $file = fopen( $filename, 'w' ) ) ) { // файла нет, создадим пустой
-			fclose( $file );
-			
+		
+		if ( file_exists( $filename ) || touch( $filename ) ) { // файла нет, создадим пустой
 			return new Entry( $name, $this->dir );
 		}
 		
@@ -80,16 +71,14 @@ class Confdotd {
 	/**
 	 * Удаление конфига
 	 */
-	public function Delete( Entry $entry ) : bool {
-		$this->CheckDir( $entry );
-		
-		$linkPath = $this->dirEnabled.'/'.$entry->name;
+	public function Delete( string $name ) : bool {
+		$linkPath = $this->dirEnabled.'/'.$name;
 		
 		if ( is_link( $linkPath ) && !unlink( $linkPath ) ) { // конфиг был ранее включен, убираем мусор
 			return false; // не удалось удалить ссылку, не достаточно прав
 		}
 		
-		$configPath = $this->dir.'/'.$entry->name;
+		$configPath = $this->dir.'/'.$name;
 		
 		return ( file_exists( $configPath ) && unlink( $configPath ) );
 	}
@@ -97,11 +86,9 @@ class Confdotd {
 	/**
 	 * Проверка, что элемент включен
 	 */
-	public function IsEnabled( Entry $entry ) : bool {
-		$this->CheckDir( $entry );
-		
-		$origPath = $this->dir.'/'.$entry->name;
-		$linkPath = $this->dirEnabled.'/'.$entry->name;
+	public function IsEnabled( string $name ) : bool {
+		$origPath = $this->dir.'/'.$name;
+		$linkPath = $this->dirEnabled.'/'.$name;
 		
 		return ( file_exists( $origPath ) && is_link( $linkPath ) && ( realpath( $linkPath ) == $origPath ) );
 	}
@@ -109,39 +96,19 @@ class Confdotd {
 	/**
 	 * Включить конфиг
 	 */
-	public function Enable( Entry $entry ) : bool {
-		$this->CheckDir( $entry );
+	public function Enable( string $name ) : bool {
+		$configPath = $this->dir.'/'.$name;
+		$linkPath = $this->dirEnabled.'/'.$name;
 		
-		$configPath = $this->dir.'/'.$entry->name;
-		
-		if ( !file_exists( $configPath ) ) {
-			throw new \RuntimeException( 'Entry not found' );
-		}
-		
-		$linkPath = $this->dirEnabled.'/'.$entry->name;
-		
-		if ( !is_link( $linkPath ) && symlink( $configPath, $linkPath ) ) {
-			$entry->enabled = true;
-			
-			return true;
-		}
-		
-		return false;
+		return !is_link( $linkPath ) && symlink( $configPath, $linkPath );
 	}
 	
 	/**
 	 * Отключить конфиг
 	 */
-	public function Disable( Entry $entry ) : bool {
-		$this->CheckDir( $entry );
+	public function Disable( string $name ) : bool {
+		$filename = $this->dirEnabled.'/'.$name;
 		
-		$filename = $this->dirEnabled.'/'.$entry->name;
-		if ( is_link( $filename ) && unlink( $filename ) ) {
-			$entry->enabled = false;
-			
-			return true;
-		}
-		
-		return false;
+		return is_link( $filename ) && unlink( $filename );
 	}
 }

@@ -127,6 +127,15 @@ function TestConfigs( string $dir, string $dirEnabled, Condition $condition ) {
 		}
 	}
 	
+	$notExists = 'non_existing.conf';
+	
+	if ( $confd->Enable( $notExists ) ) {
+		throw new RuntimeException( 'enabled non existing config' );
+	}
+	if ( is_link( $dirEnabled.'/'.$notExists ) ) {
+		throw new RuntimeException( 'trash link created' );
+	}
+	
 	$names = EntriesToNames( EntriesEnabled( $confd->List( ) ) );
 	if ( $testEnabled != $names ) {
 		var_dump( $testEnabled, $names );

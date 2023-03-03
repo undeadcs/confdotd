@@ -80,17 +80,17 @@ class Confdotd {
 		
 		$configPath = $this->dir.'/'.$name;
 		
-		return ( file_exists( $configPath ) && unlink( $configPath ) );
+		return file_exists( $configPath ) && unlink( $configPath );
 	}
 	
 	/**
 	 * Проверка, что элемент включен
 	 */
 	public function IsEnabled( string $name ) : bool {
-		$origPath = $this->dir.'/'.$name;
+		$configPath = $this->dir.'/'.$name;
 		$linkPath = $this->dirEnabled.'/'.$name;
 		
-		return ( file_exists( $origPath ) && is_link( $linkPath ) && ( realpath( $linkPath ) == $origPath ) );
+		return file_exists( $configPath ) && is_link( $linkPath ) && ( realpath( $linkPath ) == $configPath );
 	}
 
 	/**
@@ -100,15 +100,16 @@ class Confdotd {
 		$configPath = $this->dir.'/'.$name;
 		$linkPath = $this->dirEnabled.'/'.$name;
 		
-		return !is_link( $linkPath ) && symlink( $configPath, $linkPath );
+		return file_exists( $configPath ) && !is_link( $linkPath ) && symlink( $configPath, $linkPath );
 	}
 	
 	/**
 	 * Отключить конфиг
 	 */
 	public function Disable( string $name ) : bool {
-		$filename = $this->dirEnabled.'/'.$name;
+		$configPath = $this->dir.'/'.$name;
+		$linkPath = $this->dirEnabled.'/'.$name;
 		
-		return is_link( $filename ) && unlink( $filename );
+		return file_exists( $configPath ) && is_link( $linkPath ) && unlink( $linkPath );
 	}
 }

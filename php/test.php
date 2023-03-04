@@ -116,6 +116,33 @@ function TestConfigs( string $dir, string $dirEnabled, Condition $condition ) {
 	
 	echo "OK\n";
 	
+	# поиск конфигов
+	echo 'existance...';
+	
+	$exists = 'config01.conf';
+	$notExists = 'non_existing.conf';
+	
+	if ( !$confd->Exists( $exists ) ) {
+		throw new RuntimeException( 'existing config not exists' );
+	}
+	if ( !$confd->Find( $exists ) ) {
+		throw new RuntimeException( 'existing config not found' );
+	}
+	if ( $confd->Exists( $notExists ) ) {
+		throw new RuntimeException( 'not existing config exists' );
+	}
+	if ( $confd->Find( $notExists ) ) {
+		throw new RuntimeException( 'not existing config found' );
+	}
+	if ( $confd->Enable( $notExists ) ) {
+		throw new RuntimeException( 'enabled non existing config' );
+	}
+	if ( is_link( $dirEnabled.'/'.$notExists ) ) {
+		throw new RuntimeException( 'trash link created' );
+	}
+	
+	echo "OK\n";
+	
 	#2. включение конфигов: включаем конфиги, после листинга выбираем enabled и сравниваем
 	echo 'enabling...';
 	$testEnabled = [ 'config03.conf', 'config04.conf', 'config09.conf', 'config11.conf' ];
@@ -125,15 +152,6 @@ function TestConfigs( string $dir, string $dirEnabled, Condition $condition ) {
 		if ( !$confd->Enable( $name ) ) {
 			throw new RuntimeException( "failed to enable '$name' config" );
 		}
-	}
-	
-	$notExists = 'non_existing.conf';
-	
-	if ( $confd->Enable( $notExists ) ) {
-		throw new RuntimeException( 'enabled non existing config' );
-	}
-	if ( is_link( $dirEnabled.'/'.$notExists ) ) {
-		throw new RuntimeException( 'trash link created' );
 	}
 	
 	$names = EntriesToNames( EntriesEnabled( $confd->List( ) ) );

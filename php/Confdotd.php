@@ -56,6 +56,20 @@ class Confdotd {
 	}
 	
 	/**
+	 * Проверка наличия конфига
+	 */
+	public function Exists( string $name ) : bool {
+		return file_exists( $this->dir.'/'.$name );
+	}
+	
+	/**
+	 * Поиск конфига по имени
+	 */
+	public function Find( string $name ) : ?Entry {
+		return $this->Exists( $name ) ? new Entry( $name, $this->dir ) : null;
+	}
+	
+	/**
 	 * Добавление конфига
 	 */
 	public function Add( string $name ) : ?Entry {

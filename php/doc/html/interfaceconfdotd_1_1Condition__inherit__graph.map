@@ -1,0 +1,6 @@
+<map id="confdotd\Condition" name="confdotd\Condition">
+<area shape="rect" id="node1" title="Условие выбора конфига" alt="" coords="95,5,240,32"/>
+<area shape="rect" id="node2" href="$classconfdotd_1_1conditions_1_1File.html" title="Просто файл" alt="" coords="79,80,256,107"/>
+<area shape="rect" id="node3" href="$classconfdotd_1_1conditions_1_1Regexp.html" title="Регулярное выражение" alt="" coords="5,155,156,196"/>
+<area shape="rect" id="node4" href="$classconfdotd_1_1conditions_1_1ShellPattern.html" title="Паттерн как в командной строке" alt="" coords="180,155,331,196"/>
+</map>

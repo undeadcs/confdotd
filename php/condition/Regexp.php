@@ -7,7 +7,7 @@ use confdotd\Entry;
 /**
  * Регулярное выражение
  */
-class Regexp implements Condition {
+class Regexp extends File {
 	protected string $pattern;
 	
 	public function __construct( string $pattern = '/\.conf$/' ) {
@@ -18,6 +18,6 @@ class Regexp implements Condition {
 	 * Подпадает ли элемент директории под условие выборки
 	 */
 	public function Match( Entry $entry ) : bool {
-		return preg_match( $this->pattern, $entry->dir.'/'.$entry->name );
+		return parent::Match( $entry ) && preg_match( $this->pattern, $entry->dir.'/'.$entry->name );
 	}
 }

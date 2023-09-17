@@ -6,20 +6,27 @@ namespace confdotd;
  */
 class Entry {
 	/**
-	 * @var string имя без пути
+	 * Имя без пути
 	 */
 	public string $name;
 	
 	/**
-	 * @var string директория
+	 * Путь директории
 	 */
 	public string $dir;
 	
 	/**
-	 * @var bool включен ли конфиг
+	 * Включен ли конфиг
 	 */
 	public bool $enabled;
 	
+	/**
+	 * Конструктор
+	 * 
+	 * @param string $name Имя без пути
+	 * @param string $dir Путь директории
+	 * @param bool $enabled Включен ли конфиг
+	 */
 	public function __construct( string $name, string $dir, bool $enabled = false ) {
 		$this->name		= $name;
 		$this->dir		= $dir;

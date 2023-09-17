@@ -11,15 +11,22 @@ class Confdotd {
 	protected Condition $condition;
 	
 	/**
-	 * Директория в файловой системе
+	 * Директория с конфигами
 	 */
 	protected string $dir;
 	
 	/**
-	 * Директория для вкл/выкл ссылок
+	 * Директория с ссылками
 	 */
 	protected string $dirEnabled;
 	
+	/**
+	 * Конструктор
+	 * 
+	 * @param string $dir Директория с конфигами
+	 * @param Condition $condition Условие выборки
+	 * @param string $dirEnabled Директория с ссылками
+	 */
 	public function __construct( string $dir, Condition $condition, string $dirEnabled = '' ) {
 		$this->dir			= $this->NormalizePath( $dir );
 		$this->condition	= $condition;

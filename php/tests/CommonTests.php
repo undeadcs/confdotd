@@ -4,10 +4,10 @@ namespace confdotd\tests;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use confdotd\Confdotd;
-use confdotd\condition\File;
 use confdotd\Condition;
-use confdotd\condition\Regexp;
-use confdotd\condition\ShellPattern;
+use confdotd\conditions\File;
+use confdotd\conditions\Regexp;
+use confdotd\conditions\ShellPattern;
 
 /**
  * Общие тесты

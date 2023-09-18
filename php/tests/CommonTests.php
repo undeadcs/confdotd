@@ -93,20 +93,55 @@ class CommonTests extends TestCase {
 	}
 	
 	/**
-	 * Выборка по признаку файла
+	 * Проверка всех конфигов с их добавлением и включением
+	 */
+	protected function CheckAll( Confdotd $confd, array $all, bool $pair = true ) : void {
+		foreach( $all as $name ) {
+			$this->assertNotNull( $confd->Add( $name ) );
+			$this->assertTrue( is_file( $this->tmpdir.'/available/'.$name ) ); // должен быть создан файл
+			$this->assertTrue( $confd->Enable( $name ) ); // для одной директории ничего по сути не делает
+			
+			if ( $pair ) {
+				$this->assertTrue( is_link( $this->tmpdir.'/enabled/'.$name ) ); // должна быть создана ссылка
+				$this->assertEquals( $this->tmpdir.'/available/'.$name, realpath( $this->tmpdir.'/enabled/'.$name ) ); // ссылка должна вести на файл конфига
+			} else {
+				$this->assertTrue( $confd->IsEnabled( $name ) ); // всегда включен
+				$this->assertFalse( $confd->Disable( $name ) ); // невозможно отключить, только удалить
+			}
+		}
+	}
+	
+	/**
+	 * Проверка всего списка
+	 */
+	protected function CheckListAll( Confdotd $confd, array $all ) : void {
+		mkdir( $this->tmpdir.'/available/invalidentry.conf' ); // invalidentry.conf - не должно попадать в список, т.к. директория
+		$actualNames = $this->GetActualNames( $confd );
+		$this->assertEquals( $all, $actualNames );
+	}
+	
+	/**
+	 * Проверка удаления
+	 */
+	protected function CheckDelete( Confdotd $confd, array $deleted, array $enabled = [ ] ) : void {
+		foreach( $deleted as $name ) {
+			$this->assertTrue( $confd->Delete( $name ) );
+			$this->assertFalse( is_file( $this->tmpdir.'/available/'.$name ) ); // файл должен быть удален
+			
+			if ( in_array( $name, $enabled ) ) { // при удалении включенного конфига его ссылка должна быть удалена
+				$this->assertFalse( is_link( $this->tmpdir.'/enabled/'.$name ) );
+			}
+		}
+	}
+	
+	/**
+	 * Общее тестирование
 	 */
 	#[ DataProvider( 'configsProvider' ) ]
 	public function testConfigs( Condition $condition, array $all, array $enabled, array $disabled, array $deleted ) : void {
 		$confd = new Confdotd( $this->tmpdir.'/available', $condition, $this->tmpdir.'/enabled' );
 		
-		foreach( $all as $name ) {
-			$this->assertNotNull( $confd->Add( $name ) );
-			$this->assertTrue( is_file( $this->tmpdir.'/available/'.$name ) ); // должен быть создан файл
-			
-			$this->assertTrue( $confd->Enable( $name ) );
-			$this->assertTrue( is_link( $this->tmpdir.'/enabled/'.$name ) ); // должна быть создана ссылка
-			$this->assertEquals( $this->tmpdir.'/available/'.$name, realpath( $this->tmpdir.'/enabled/'.$name ) ); // ссылка должна вести на файл конфига
-		}
+		$this->CheckAll( $confd, $all );
 		
 		foreach( $disabled as $name ) {
 			$this->assertTrue( $confd->Disable( $name ) );
@@ -118,9 +153,7 @@ class CommonTests extends TestCase {
 			$this->assertTrue( $confd->IsEnabled( $name ) );
 		}
 		
-		mkdir( $this->tmpdir.'/available/invalidentry.conf' ); // invalidentry.conf - не должно попадать в список, т.к. директория
-		$actualNames = $this->GetActualNames( $confd );
-		$this->assertEquals( $all, $actualNames );
+		$this->CheckListAll( $confd, $all );
 		
 		$enabledNames = $this->GetActualNames( $confd, self::FETCH_ENABLED );
 		$this->assertEquals( $enabled, $enabledNames );
@@ -128,14 +161,18 @@ class CommonTests extends TestCase {
 		$disabledNames = $this->GetActualNames( $confd, self::FETCH_DISABLED );
 		$this->assertEquals( $disabled, $disabledNames );
 		
-		// удаление и проверка отсутствия файла и ссылки
-		foreach( $deleted as $name ) {
-			$this->assertTrue( $confd->Delete( $name ) );
-			$this->assertFalse( is_file( $this->tmpdir.'/available/'.$name ) ); // файл должен быть удален
-			
-			if ( in_array( $name, $enabled ) ) { // при удалении включенного конфига его ссылка должна быть удалена
-				$this->assertFalse( is_link( $this->tmpdir.'/enabled/'.$name ) );
-			}
-		}
+		$this->CheckDelete( $confd, $deleted, $enabled );
+	}
+	
+	/**
+	 * Тестирование пир работы только с одной директорией
+	 */
+	#[ DataProvider( 'configsProvider' ) ]
+	public function testSingleDir( Condition $condition, array $all, array $enabled, array $disabled, array $deleted ) : void {
+		$confd = new Confdotd( $this->tmpdir.'/available', $condition );
+		
+		$this->CheckAll( $confd, $all, false );
+		$this->CheckListAll( $confd, $all );
+		$this->CheckDelete( $confd, $deleted );
 	}
 }

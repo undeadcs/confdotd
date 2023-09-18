@@ -16,7 +16,7 @@ class Confdotd {
 	protected string $dir;
 	
 	/**
-	 * Директория с ссылками
+	 * Директория с ссылками для включения
 	 */
 	protected string $dirEnabled;
 	
@@ -30,7 +30,7 @@ class Confdotd {
 	public function __construct( string $dir, Condition $condition, string $dirEnabled = '' ) {
 		$this->dir			= $this->NormalizePath( $dir );
 		$this->condition	= $condition;
-		$this->dirEnabled	= ( $dirEnabled == '' ) ? $this->dir.'/enabled' : $this->NormalizePath( $dirEnabled );
+		$this->dirEnabled	= ( $dirEnabled == '' ) ? '' : $this->NormalizePath( $dirEnabled );
 	}
 	
 	/**
@@ -108,6 +108,10 @@ class Confdotd {
 	 * Проверка, что элемент включен
 	 */
 	public function IsEnabled( string $name ) : bool {
+		if ( $this->dirEnabled == '' ) {
+			return true;
+		}
+		
 		$configPath = $this->dir.'/'.$name;
 		$linkPath = $this->dirEnabled.'/'.$name;
 		
@@ -118,6 +122,10 @@ class Confdotd {
 	 * Включить конфиг
 	 */
 	public function Enable( string $name ) : bool {
+		if ( $this->dirEnabled == '' ) {
+			return true;
+		}
+		
 		$configPath = $this->dir.'/'.$name;
 		$linkPath = $this->dirEnabled.'/'.$name;
 		
@@ -128,6 +136,10 @@ class Confdotd {
 	 * Отключить конфиг
 	 */
 	public function Disable( string $name ) : bool {
+		if ( $this->dirEnabled == '' ) {
+			return false;
+		}
+		
 		$configPath = $this->dir.'/'.$name;
 		$linkPath = $this->dirEnabled.'/'.$name;
 		
